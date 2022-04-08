@@ -16,7 +16,7 @@ def trepr(t, bykey=False):
     if not t.isRealNode():
         return ["#"]
 
-    thistr = "val:" + str(t.value) + " h:" + str(t.getHeight()) + " s:" +str(t.getSize()) + " bf:" + str(t.getBalanceFactor()) if bykey else str(t.value)
+    thistr = "value:" + str(t.value) + " h:" + str(t.getHeight()) + " size:" +str(t.getSize()) + " bf:" + str(t.getBalanceFactor()) if bykey else str(t.value)
 
     return conc(trepr(t.left, bykey), thistr, trepr(t.right, bykey))
 
