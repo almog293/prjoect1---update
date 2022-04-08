@@ -460,7 +460,7 @@ class AVLTreeList(object):
         B.setLeft(A.getRight())
         B.getLeft().setParent(B)
         A.setRight(B)
-        if B.B.haveParent():  # if rotated node is the root of the tree
+        if B.haveParent():  # if rotated node is the root of the tree
             A.setParent(B.getParent())
             if B.isRightSon():
                 A.getParent().setRight(A)
