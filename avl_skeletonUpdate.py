@@ -144,6 +144,7 @@ class AVLNode(object):
         if self.isRealNode():
             self.left = node
 
+
     """sets right child
 
     @type node: AVLNode
@@ -308,8 +309,7 @@ class AVLTreeList(object):
     """
 
     def insert(self, i, val):
-        if not (0 <= i <= self.length()):
-            return 0
+
         nodeToInsert = AVLNode(val)
 
         if i == 0 and self.empty():  # if tree is empty
@@ -339,13 +339,11 @@ class AVLTreeList(object):
         root.increaseSizeByOne()
 
         if i == 0 and not root.getLeft().isRealNode():  # insert node as left son
-            root.setLeft(nodeToInsert)
-            nodeToInsert.setParent(root)
+            root.setLeft(nodeToInsert), nodeToInsert.setParent(root)
             return
 
         if i == 1 and not root.getRight().isRealNode() and not root.getLeft().isRealNode():  # insert node as right son
-            root.setRight(nodeToInsert)
-            nodeToInsert.setParent(root)
+            root.setRight(nodeToInsert), nodeToInsert.setParent(root)
             return
 
         leftTreeSize = root.getLeft().getSize()
@@ -391,9 +389,7 @@ class AVLTreeList(object):
             else:
                 if node.getHeight() == parentLastHeight:  # nothing need to be rotated
                     return counter
-                else:
-                    node = node.getParent()
-                    continue
+
             node = node.getParent()
 
         return counter
@@ -460,7 +456,7 @@ class AVLTreeList(object):
         B.setLeft(A.getRight())
         B.getLeft().setParent(B)
         A.setRight(B)
-        if B.B.haveParent():  # if rotated node is the root of the tree
+        if B.haveParent():  # if rotated node is the root of the tree
             A.setParent(B.getParent())
             if B.isRightSon():
                 A.getParent().setRight(A)
@@ -646,5 +642,8 @@ if __name__ == '__main__':
     tree.insert(7, "7")
     tree.insert(8, "8")
     tree.insert(9, "9")
+    tree.insert(0, "01")
+    tree.insert(0, "02")
+    tree.insert(0, "03")
 
     print(tree)
