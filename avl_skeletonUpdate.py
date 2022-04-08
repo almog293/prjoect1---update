@@ -312,7 +312,7 @@ class AVLTreeList(object):
             return 0
         nodeToInsert = AVLNode(val)
 
-        if i == 0 and self.root is None:  # if tree is empty
+        if i == 0 and self.empty():  # if tree is empty
             self.first = nodeToInsert
             self.last = nodeToInsert
             self.root = nodeToInsert
