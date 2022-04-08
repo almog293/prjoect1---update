@@ -402,8 +402,7 @@ class AVLTreeList(object):
     """
 
     def rightThenLeft(self, B):
-        self.rightRotate(B.getRight())
-        self.leftRotate(B)
+        self.rightRotate(B.getRight()), self.leftRotate(B)
         return 2
 
     """left then right rotate operation
@@ -414,8 +413,7 @@ class AVLTreeList(object):
     """
 
     def leftThenRight(self, B):
-        self.leftRotate(B.getLeft())
-        self.rightRotate(B)
+        self.leftRotate(B.getLeft()), self.rightRotate(B)
         return 2
 
     """left rotate operation
@@ -427,8 +425,7 @@ class AVLTreeList(object):
 
     def leftRotate(self, B):
         A = B.getRight()
-        B.setRight(A.getLeft())
-        B.getRight().setParent(B)
+        B.setRight(A.getLeft()), B.getRight().setParent(B)
         A.setLeft(B)
         if B.haveParent():  # if rotated node is the root of the tree
             A.setParent(B.getParent())
@@ -453,8 +450,7 @@ class AVLTreeList(object):
 
     def rightRotate(self, B):
         A = B.getLeft()
-        B.setLeft(A.getRight())
-        B.getLeft().setParent(B)
+        B.setLeft(A.getRight()), B.getLeft().setParent(B)
         A.setRight(B)
         if B.haveParent():  # if rotated node is the root of the tree
             A.setParent(B.getParent())
@@ -571,7 +567,12 @@ class AVLTreeList(object):
     """
 
     def search(self, val):
-        return
+        array = self.listToArray()
+        for i in range(len(array)):
+            if array[i] == (val):
+                return i
+        return -1
+
 
     """returns the root of the tree representing the list
 
@@ -647,3 +648,4 @@ if __name__ == '__main__':
     tree.insert(0, "03")
 
     print(tree)
+
