@@ -3,6 +3,8 @@
 # name1    - complete info
 # id2      - complete info
 # name2    - complete info
+import math
+import random
 
 from printree import *
 
@@ -246,6 +248,13 @@ class AVLNode(object):
     def haveParent(self):
         return self.getParent() is not None
 
+    def isLeaf(self):
+        if self.getLeft() is not None:
+            if not self.getLeft().isRealNode():
+                if self.getRight() is not None:
+                    if not self.getRight().isRealNode():
+                        return True
+        return False
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -336,22 +345,23 @@ class AVLTreeList(object):
         """
 
     def insertRec(self, i, root, nodeToInsert):
-        root.increaseSizeByOne()
+
 
         if i == 0 and not root.getLeft().isRealNode():  # insert node as left son
             root.setLeft(nodeToInsert), nodeToInsert.setParent(root)
-            return
-
-        if i == 1 and not root.getRight().isRealNode() and not root.getLeft().isRealNode():  # insert node as right son
+        elif i == 1 and root.isLeaf():  # insert node as right son
             root.setRight(nodeToInsert), nodeToInsert.setParent(root)
-            return
+        elif i == 2 and root.getSize() == 2 and root.getLeft().isRealNode():
+            root.setRight(nodeToInsert), nodeToInsert.setParent(root)
+        else:
+            leftTreeSize = root.getLeft().getSize()
 
-        leftTreeSize = root.getLeft().getSize()
+            if i <= leftTreeSize:  # go to left subtree
+                self.insertRec(i, root.getLeft(), nodeToInsert)
+            else:  # got to right subtree
+                self.insertRec(i - (leftTreeSize + 1), root.getRight(), nodeToInsert)
 
-        if i <= leftTreeSize:  # go to left subtree
-            self.insertRec(i, root.getLeft(), nodeToInsert)
-        else:  # got to right subtree
-            self.insertRec(i - (leftTreeSize + 1), root.getRight(), nodeToInsert)
+        root.increaseSizeByOne()
         return
 
     """rebalance the tree after insertion
@@ -402,7 +412,8 @@ class AVLTreeList(object):
     """
 
     def rightThenLeft(self, B):
-        self.rightRotate(B.getRight()), self.leftRotate(B)
+        self.rightRotate(B.getRight())
+        self.leftRotate(B)
         return 2
 
     """left then right rotate operation
@@ -413,7 +424,8 @@ class AVLTreeList(object):
     """
 
     def leftThenRight(self, B):
-        self.leftRotate(B.getLeft()), self.rightRotate(B)
+        self.leftRotate(B.getLeft())
+        self.rightRotate(B)
         return 2
 
     """left rotate operation
@@ -624,6 +636,9 @@ class AVLTreeList(object):
             parent = node.getParent()
         return parent
 
+    def getFirstNode(self):
+        return self.first
+
     def __repr__(self):  # no need to understand the implementation of this one
         out = ""
         for row in printree(self.root):  # need printree.py file
@@ -633,19 +648,20 @@ class AVLTreeList(object):
 
 if __name__ == '__main__':
     tree = AVLTreeList()
-    tree.insert(0, "0")
-    tree.insert(1, "1")
-    tree.insert(2, "2")
-    tree.insert(3, "3")
-    tree.insert(4, "4")
-    tree.insert(5, "5")
-    tree.insert(6, "6")
-    tree.insert(7, "7")
-    tree.insert(8, "8")
-    tree.insert(9, "9")
-    tree.insert(0, "01")
-    tree.insert(0, "02")
-    tree.insert(0, "03")
+    rand = 0
+    for i in range(40):
+        tree.insert(rand, rand)
+        rand = random.randrange(0, i + 1)
 
+    node = tree.getFirstNode()
+    last = tree.last
+    treeList = tree.listToArray()
+    n = len(treeList)
+    i = 0
+    while node is not None:
+        if treeList[i] != node.getValue() or treeList[n-i-1] != last.getValue():
+            print("Error")
+        node = tree.getSuccessor(node)
+        i += 1
+        last = tree.getPredecessor(last)
     print(tree)
-
