@@ -146,7 +146,6 @@ class AVLNode(object):
         if self.isRealNode():
             self.left = node
 
-
     """sets right child
 
     @type node: AVLNode
@@ -303,9 +302,9 @@ class AVLTreeList(object):
         if i == currentIndex:
             return root
         elif i < currentIndex:
-            return self.retriveRec(root.getLeft(), i)  # got to left subtree
+            return self.retriveRec(root.getLeft(), i)  # go to left subtree
         else:
-            return self.retriveRec(root.getRight(), i - currentIndex - 1)  # got to right subtree
+            return self.retriveRec(root.getRight(), i - currentIndex - 1)  # go to right subtree
 
     """inserts val at position i in the list
     @type i: int
@@ -346,7 +345,6 @@ class AVLTreeList(object):
 
     def insertRec(self, i, root, nodeToInsert):
 
-
         if i == 0 and not root.getLeft().isRealNode():  # insert node as left son
             root.setLeft(nodeToInsert), nodeToInsert.setParent(root)
         elif i == 1 and root.isLeaf():  # insert node as right son
@@ -355,7 +353,6 @@ class AVLTreeList(object):
             root.setRight(nodeToInsert), nodeToInsert.setParent(root)
         else:
             leftTreeSize = root.getLeft().getSize()
-
             if i <= leftTreeSize:  # go to left subtree
                 self.insertRec(i, root.getLeft(), nodeToInsert)
             else:  # got to right subtree
@@ -584,7 +581,6 @@ class AVLTreeList(object):
             if array[i] == (val):
                 return i
         return -1
-
 
     """returns the root of the tree representing the list
 
