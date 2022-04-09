@@ -3,6 +3,8 @@
 # name1    - complete info
 # id2      - complete info
 # name2    - complete info
+import math
+import random
 
 from printree import *
 
@@ -201,6 +203,7 @@ class AVLNode(object):
     @rtype: AVLNode
     @returns: the node with the maximum rank in a subtree
     """
+    
     def getMax(self):
         node = self
         while node.getRight().isRealNode():
@@ -214,15 +217,43 @@ class AVLNode(object):
     @rtype: AVLNode
     @returns: the node with the minimum rank in a subtree
     """
+    
     def getMin(self):
         node = self
         while node.getLeft().isRealNode():
             node = node.getLeft()
         return node
 
+    """check if node is left son
+    @rtype : boolean
+    @return : if node is left son
+    """
 
+    def isLeftSon(self):
+        if self.getParent() is not None and self.getParent().getLeft() == self:
+            return True
+        return False
 
+    """check if node is right son
+    @rtype : boolean
+    @return : if node is right son
+    """
 
+    def isRightSon(self):
+        if self.getParent() is not None and self.getParent().getRight() == self:
+            return True
+        return False
+
+    def haveParent(self):
+        return self.getParent() is not None
+
+    def isLeaf(self):
+        if self.getLeft() is not None:
+            if not self.getLeft().isRealNode():
+                if self.getRight() is not None:
+                    if not self.getRight().isRealNode():
+                        return True
+        return False
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -261,7 +292,6 @@ class AVLTreeList(object):
     """
 
     def retrieve(self, i):
-        print("retrive: ", i)
         root = self.getRoot()
         return self.retriveRec(root, i).getValue()
 
@@ -272,9 +302,9 @@ class AVLTreeList(object):
         if i == currectIndex:
             return root
         elif i < currectIndex:
-            return self.retriveRec(root.getLeft(), i)
+            return self.retriveRec(root.getLeft(), i)  # go to left subtree
         else:
-            return self.retriveRec(root.getRight(), i - currectIndex - 1)
+            return self.retriveRec(root.getRight(), i - currectIndex - 1)  # go to right subtree
 
     """inserts val at position i in the list
     @type i: int
@@ -287,25 +317,23 @@ class AVLTreeList(object):
     """
 
     def insert(self, i, val):
-        if not (0 <= i <= self.length()):
-            return 0
 
         nodeToInsert = AVLNode(val)
+        
         if i == 0 and self.root is None:
             self.first = nodeToInsert
             self.last = nodeToInsert
             self.root = nodeToInsert
-
             return 0
-        if i == 0:
+        
+        if i == 0:  # update first node
             self.first = nodeToInsert
-        if i == self.getRoot().getSize():
+        if i == self.getRoot().getSize():  # update last node
             self.last = nodeToInsert
 
         self.insertRec(i, self.getRoot(), nodeToInsert)
         parentNode = nodeToInsert.getParent()
-        counter = self.fixTree(parentNode)
-        return counter
+        return self.fixTree(parentNode)
 
     """recursive function for insert the node
 
@@ -316,24 +344,21 @@ class AVLTreeList(object):
         """
 
     def insertRec(self, i, root, nodeToInsert):
-        root.increaseSizeByOne()
 
-        if i == 0 and not root.getLeft().isRealNode():
-            root.setLeft(nodeToInsert)
-            nodeToInsert.setParent(root)
-            return
-
-        if i == 1 and not root.getRight().isRealNode() and not root.getLeft().isRealNode():
-            root.setRight(nodeToInsert)
-            nodeToInsert.setParent(root)
-            return
-
-        leftTreeSize = root.getLeft().getSize()
-
-        if i <= leftTreeSize:
-            self.insertRec(i, root.getLeft(), nodeToInsert)
+        if i == 0 and not root.getLeft().isRealNode():  # insert node as left son
+            root.setLeft(nodeToInsert), nodeToInsert.setParent(root)
+        elif i == 1 and root.isLeaf():  # insert node as right son
+            root.setRight(nodeToInsert), nodeToInsert.setParent(root)
+        elif i == 2 and root.getSize() == 2 and root.getLeft().isRealNode():
+            root.setRight(nodeToInsert), nodeToInsert.setParent(root)
         else:
-            self.insertRec(i - (leftTreeSize + 1), root.getRight(), nodeToInsert)
+            leftTreeSize = root.getLeft().getSize()
+            if i <= leftTreeSize:  # go to left subtree
+                self.insertRec(i, root.getLeft(), nodeToInsert)
+            else:  # got to right subtree
+                self.insertRec(i - (leftTreeSize + 1), root.getRight(), nodeToInsert)
+
+        root.increaseSizeByOne()
         return
 
     """rebalance the tree after insertion
@@ -346,75 +371,74 @@ class AVLTreeList(object):
         """
 
     def fixTree(self, node):
-        counter = 0
+        counter = 0  # count how much rotates had done
         while node is not None and node.isRealNode():
-            parentLastHeight = node.getHeight()
-            node.updateHeight()
-            node.updateBalanceFactor()
-            bf = node.getBalanceFactor()
-            if abs(bf) <= 1 and node.getHeight() == parentLastHeight:
-                return counter
-            elif abs(bf) <= 1 and node.getHeight() != parentLastHeight:
-                node = node.getParent()
-                continue
 
-            elif abs(bf) == 2:
+            parentLastHeight = node.getHeight()
+            node.updateHeight(), node.updateBalanceFactor()
+            bf = node.getBalanceFactor()
+            if abs(bf) == 2:
+
                 if bf == -2:
                     rightNode = node.getRight()
-                    if rightNode.getBalanceFactor() == -1:
-                        self.leftRotate(node)
-                        counter += 1
-                    elif rightNode.getBalanceFactor() == 1:
-                        self.rightThenLeft(node)
-                        counter += 1
+                    if rightNode.getBalanceFactor() == -1:  # left rotate only
+                        counter += self.leftRotate(node)
+                    elif rightNode.getBalanceFactor() == 1:  # left then right rotate
+                        counter += self.rightThenLeft(node)
 
                 elif bf == 2:
                     leftNode = node.getLeft()
-                    if leftNode.getBalanceFactor() == -1:
-                        self.leftThenRight(node)
-                        counter += 1
-                    elif leftNode.getBalanceFactor() == 1:
-                        self.rightRotate(node)
-                        counter += 1
+                    if leftNode.getBalanceFactor() == -1:  # right rotate only
+                        counter += self.leftThenRight(node)
+                    elif leftNode.getBalanceFactor() == 1:  # right then left rotate
+                        counter += self.rightRotate(node)
+
+            else:
+                if node.getHeight() == parentLastHeight:  # nothing need to be rotated
+                    return counter
+
             node = node.getParent()
 
         return counter
 
     """right then left rotate operation
-        @type AVLnode()
-        @param i: the node that need to be rotated
-        """
+    @type AVLnode()
+    @param i: the node that need to be rotated
+    @rtype int
+    @return number of rotates
+    """
 
     def rightThenLeft(self, B):
         self.rightRotate(B.getRight())
         self.leftRotate(B)
+        return 2
 
     """left then right rotate operation
-            @type AVLnode()
-            @param i: the node that need to be rotated
-            """
+    @type AVLnode()
+    @param i: the node that need to be rotated
+    @rtype int
+    @return number of rotates
+    """
 
     def leftThenRight(self, B):
         self.leftRotate(B.getLeft())
         self.rightRotate(B)
-
+        return 2
+    
     """left rotate operation
-            @type AVLnode()
-            @param i: the node that need to be rotated
-            """
+    @type AVLnode()
+    @param i: the node that need to be rotated
+    @rtype int
+    @return number of rotates
+    """
 
     def leftRotate(self, B):
-        isLeftSon = False
-        if B.getParent() is not None and B.getParent().getLeft() == B:
-            isLeftSon = True
         A = B.getRight()
-
-        B.setRight(A.getLeft())
-        B.getRight().setParent(B)
+        B.setRight(A.getLeft()), B.getRight().setParent(B)
         A.setLeft(B)
-        if B.getParent() is not None:
+        if B.haveParent():  # if rotated node is the root of the tree
             A.setParent(B.getParent())
-            if isLeftSon:
+            if B.isLeftSon():
                 A.getParent().setLeft(A)
             else:
                 A.getParent().setRight(A)
@@ -423,43 +447,41 @@ class AVLTreeList(object):
             self.root = A
 
         B.setParent(A)
-        A.updateHeight()
-        B.updateHeight()
-        A.updateBalanceFactor()
-        B.updateBalanceFactor()
-        A.setSize(B.getSize())
-        B.setSize(B.getLeft().getSize() + B.getRight().getSize() + 1)
+        self.updateNodesInfo(A, B)
+        return 1
 
     """right rotate operation
-            @type AVLnode()
-            @param i: the node that need to be rotated
-            """
+    @type AVLnode()
+    @param i: the node that need to be rotated
+    @rtype int
+    @return number of rotates
+    """
 
     def rightRotate(self, B):
-        isRightSon = False
-        if B.getParent() is not None and B.getParent().getRight() == B:
-            isRightSon = True
         A = B.getLeft()
-
-        B.setLeft(A.getRight())
-        B.getLeft().setParent(B)
+        B.setLeft(A.getRight()), B.getLeft().setParent(B)
         A.setRight(B)
-        if B.getParent() is not None:
-
+        if B.haveParent():  # if rotated node is the root of the tree
             A.setParent(B.getParent())
-            if isRightSon:
+            if B.isRightSon():
                 A.getParent().setRight(A)
             else:
                 A.getParent().setLeft(A)
         else:
             A.setParent(None)
             self.root = A
-
         B.setParent(A)
-        A.updateHeight()
-        B.updateHeight()
-        A.updateBalanceFactor()
-        B.updateBalanceFactor()
+        self.updateNodesInfo(A, B)
+        return 1
+
+    """update Nodes height size and Bf after rotation
+    @type AVLnode()
+    @param A ,B: Node that been part of rotation
+    """
+
+    def updateNodesInfo(self, A, B):
+        A.updateHeight(), B.updateHeight()
+        A.updateBalanceFactor(), B.updateBalanceFactor()
         A.setSize(B.getSize())
         B.setSize(B.getLeft().getSize() + B.getRight().getSize() + 1)
 
@@ -554,7 +576,11 @@ class AVLTreeList(object):
     """
 
     def search(self, val):
-        return
+        array = self.listToArray()
+        for i in range(len(array)):
+            if array[i] == (val):
+                return i
+        return -1
 
     """returns the root of the tree representing the list
 
@@ -579,9 +605,9 @@ class AVLTreeList(object):
         @rtype: AVLNode
         @returns: the successor of node,  None if there is no left child
         """
-    def getSuccessor(self , node):
-
-        if node.getRight().isRealNode():
+    
+    def getSuccessor(self, node):
+        if node.getRight().isRealNode():  # if have right son
             return node.getRight().getMin()
         else:
             parent = node.getParent()
@@ -589,8 +615,6 @@ class AVLTreeList(object):
                 node = node.getParent()
                 parent = node.getParent()
         return parent
-
-
 
     """retrieves the predecessor
     @type node: AVLnode
@@ -607,6 +631,9 @@ class AVLTreeList(object):
             node = node.getParent()
             parent = node.getParent()
         return parent
+
+    def getFirstNode(self):
+        return self.first
 
     def __repr__(self):  # no need to understand the implementation of this one
         out = ""
