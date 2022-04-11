@@ -13,12 +13,20 @@ def printree(t, bykey=True):
 def trepr(t, bykey=False):
     """Return a list of textual representations of the levels in t
         bykey=True: show keys instead of values"""
+    if t is None:
+        return ["N/A"]
     if not t.isRealNode():
         return ["#"]
     str1 = "N/A"
     if t.getParent() is not None:
         str1 = str(t.getParent().getValue())
-    thistr = "value:" + str(t.value) + " h:" + str(t.getHeight()) + " size:" +str(t.getSize()) + " bf:" + str(t.getBalanceFactor()) + " p:" + str1 if bykey else str(t.value)
+    leftSon = "N/A"
+    rightSon = "N/A"
+    if t.getLeft() is not None:
+        leftSon = str(t.getLeft().getValue())
+    if t.getRight() is not None:
+        rightSon = str(t.getRight().getValue())
+    thistr = "value:" + str(t.value) + " h:" + str(t.getHeight()) + " size:" +str(t.getSize()) + " bf:" + str(t.getBalanceFactor()) + " p:" + str1 + " lf:" + leftSon + " rs:" + rightSon if bykey else str(t.value)
 
     return conc(trepr(t.left, bykey), thistr, trepr(t.right, bykey))
 
