@@ -979,6 +979,8 @@ def firstTest():
             depth += 0
 
 
+
+
 if __name__ == '__main__':
     tree = AVLTreeList()
     tree.insert(0, 0)
