@@ -23,10 +23,16 @@ def trepr(t, bykey=False):
     leftSon = "N/A"
     rightSon = "N/A"
     if t.getLeft() is not None:
-        leftSon = str(t.getLeft().getValue())
+        if t.getLeft().isRealNode():
+            leftSon = str(t.getLeft().getValue())
+        else:
+            rightSon = "VR"
     if t.getRight() is not None:
-        rightSon = str(t.getRight().getValue())
-    thistr = "value:" + str(t.value) + " h:" + str(t.getHeight()) + " size:" +str(t.getSize()) + " bf:" + str(t.getBalanceFactor()) + " p:" + str1 + " lf:" + leftSon + " rs:" + rightSon if bykey else str(t.value)
+        if t.getRight().isRealNode():
+            rightSon = str(t.getRight().getValue())
+        else:
+            leftSon = "VR"
+    thistr = "L:" + leftSon + " V:" + str(t.value) + " P:" + str1 + " R:" + rightSon if bykey else str(t.value)
 
     return conc(trepr(t.left, bykey), thistr, trepr(t.right, bykey))
 
