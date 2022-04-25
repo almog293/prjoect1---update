@@ -548,7 +548,6 @@ class AVLTreeList(object):
             else:  # got to right subtree
                 depth = self.insertRec(i - (leftTreeSize + 1), root.getRight(), nodeToInsert, depth + 1)
 
-        root.increaseSizeByOne()
         return depth
 
     """rebalance the tree after insertion
@@ -563,34 +562,37 @@ class AVLTreeList(object):
     def fixTree(self, node, fixAfterInsert):
         # time complexity: O(log(n)) n - number of elements in the data structure
         counter = 0  # count how much rotates had done
+
         while node is not None and node.isRealNode(): # climb until the root
             parentLastHeight = node.getHeight()
             node.updateHeight(), node.updateBalanceFactor(), node.updateSize()
             bf = node.getBalanceFactor()
-            if abs(bf) == 2:  # choose cse
+            if abs(bf) == 2:  # choose case
 
                 if bf == -2:
                     rightNode = node.getRight()
                     if rightNode.getBalanceFactor() == -1 or rightNode.getBalanceFactor() == 0:  # left rotate only
-                        counter += self.leftRotate(node)
+                        counter += 1
+                        self.leftRotate(node)
                     elif rightNode.getBalanceFactor() == 1:  # left then right rotate
-                        counter += self.rightThenLeft(node)
+                        counter += 2
+                        self.rightThenLeft(node)
 
                 elif bf == 2:
                     leftNode = node.getLeft()
                     if leftNode.getBalanceFactor() == -1:  # right then left rotate
-                        counter += self.leftThenRight(node)
+                        counter += 2
+                        self.leftThenRight(node)
                     elif leftNode.getBalanceFactor() == 1 or leftNode.getBalanceFactor() == 0:  # right rotate only
-                        counter += self.rightRotate(node)
+                        counter += 1
+                        self.rightRotate(node)
                 if node.getParent() is None:
-                    return counter
+                    continue
                 node = node.getParent()
             else:
                 if node.getHeight() != parentLastHeight:  # balance without rotate
                     counter += 1
-                if fixAfterInsert:
-                    if node.getHeight() == parentLastHeight:  # nothing need to be rotated
-                        return counter
+
             node = node.getParent()
 
         return counter
@@ -700,8 +702,9 @@ class AVLTreeList(object):
         if i < 0 or i >= self.length():
             return -1
 
-
+        a = 0
         nodeToDelete = self.treeSelect(self.root, i)
+        nodeToDeleteHeight = nodeToDelete.getHeight()
         if i == 0:  # update first and last
             self.firstNode = nodeToDelete.getSuccessor()
         if i == self.length() - 1:
@@ -748,15 +751,19 @@ class AVLTreeList(object):
             successor.getLeft().setParent(successor), successor.getRight().setParent(successor)
 
             successor.updateNodeInfo()
+            if nodeToDeleteHeight != successor.getHeight(): # balance the successor after replacing him
+                a += 1
 
-        return self.fixTreeAfterDeletion(nodeTofixFrom)
+        return self.fixTreeAfterDeletion(nodeTofixFrom) + a
 
     def fixTreeAfterDeletion(self, node):
         # time complexity: O(log(n)) n - number of elements in the data structure
         # time complexity: call fixTree which are O(log(n))
         nodeToFixFrom = node
+        lastHeight = node.getHeight()
         node.updateNodeInfo()
-
+        if lastHeight != node.getHeight():
+            return self.fixTree(nodeToFixFrom, False) + 1
         return self.fixTree(nodeToFixFrom, False)
 
     """returns the value of the first item in the list
@@ -1166,11 +1173,14 @@ def insertion():
 def smallTreeCheck():
     tree = AVLTreeList()
     tree.insert(0, 0)
+    counter = 0
     for i in range(1, 10):
+        print(tree)
+        print("insert:" , i)
         rand = random.randrange(0, i)
-        counter, depth = tree.insert(0, i)
-        print("counter: ", counter, " deptht:", depth)
-
+        counter = tree.insert(0, i)
+        print("counter: ", counter)
+    print(tree)
 
 def firstTest():
     for i in range(1, 11):
@@ -1231,24 +1241,24 @@ def firsttesting():
     for i in range(1, 11):
         tree = AVLTreeList()
         tree.insert(0, 0)
-        counter = 0
-        depth = 0
+        delcounter = 0
+        insCounter = 0
         n = int(1000 * math.pow(2,i))
         listt = tree.listToArray()
         for k in range(1, int(n/2)):  # Random Insertion
             rand = random.randrange(0, k)
             tree.insert(rand,rand)
-            listt.insert(rand,rand)
-        for k in range(0,int(n/4)):
-            rand = random.randrange(0, int(n/4) - k)
-            counter += tree.insert(rand, rand)
-            rand = random.randrange(0, int(n/4)-k)
-            counter += tree.delete(rand)
-            rand = random.randrange(0, int(n / 4) - k)
-            if listt[rand] != tree.retrieve(rand):
-                print("E")
 
-        print("i:",i, " Counter:",counter)
+        for k in range(0,int(n/4)):
+            rand = random.randrange(0, int(n/2) - k)
+            delcounter = delcounter + tree.delete(rand)
+            rand = random.randrange(0, int(n/2) - k)
+            insCounter = insCounter + tree.insert(rand,rand)
+
+        print("i:", i,"total:", insCounter + delcounter, "O(", (insCounter + delcounter)/(n/2), ")" )
+
+
+
 
 
 
